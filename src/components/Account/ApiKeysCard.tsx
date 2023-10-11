@@ -1,3 +1,7 @@
+// 导入所需的组件和类型
+//这段代码定义了一个React组件ApiKeysCard，它显示一个包含所有API密钥的表格。
+//用户可以点击"Add API key"按钮来打开一个模态框，其中他们可以创建一个新的API密钥。
+//用户还可以点击表格中的"Delete"按钮来删除一个API密钥，这将打开一个确认模态框。
 import { useDisclosure } from '@mantine/hooks';
 import { openConfirmModal } from '@mantine/modals';
 import { ApiKey } from '@prisma/client';
@@ -20,19 +24,25 @@ import { IconPlus, IconCopy, IconTrash } from '@tabler/icons-react';
 import { formatDate } from '~/utils/date-helpers';
 import { ApiKeyModal } from '~/components/Account/ApiKeyModal';
 
+// 定义一个React组件ApiKeysCard
 export function ApiKeysCard() {
+  // 使用trpc的上下文
   const utils = trpc.useContext();
 
+  // 使用useDisclosure钩子管理模态框的打开和关闭状态
   const [opened, { toggle }] = useDisclosure(false);
 
+  // 使用trpc的查询钩子获取所有用户API密钥
   const { data: apiKeys = [], isLoading } = trpc.apiKey.getAllUserKeys.useQuery({});
 
+  // 使用trpc的变异钩子删除API密钥，并在成功后使API密钥数据无效
   const deleteApiKeyMutation = trpc.apiKey.delete.useMutation({
     async onSuccess() {
       await utils.apiKey.getAllUserKeys.invalidate();
     },
   });
 
+  // 定义一个函数handleDeleteApiKey，它接受一个id参数并打开一个确认模态框
   const handleDeleteApiKey = (id: number) => {
     openConfirmModal({
       title: 'Delete API Key',
@@ -44,6 +54,7 @@ export function ApiKeysCard() {
     });
   };
 
+  // 返回一个卡片组件，其中包含一个表格，显示所有API密钥和一个删除按钮
   return (
     <>
       <Card withBorder>

@@ -1,3 +1,6 @@
+// 导入所需的组件和类型
+//这段代码定义了一个React组件ApiKeyModal，它允许用户输入一个API密钥的名称，
+//并在提交后显示生成的API密钥。用户可以复制API密钥，并在复制后显示一个确认消息。
 import {
   Button,
   Text,
@@ -18,17 +21,22 @@ import { addApiKeyInputSchema } from '~/server/schema/api-key.schema';
 import { showErrorNotification } from '~/utils/notifications';
 import { trpc } from '~/utils/trpc';
 
+// 定义一个schema常量，它是API密钥输入的验证模式
 const schema = addApiKeyInputSchema;
 
+// 定义一个React组件ApiKeyModal，它接受ModalProps类型的props
 export function ApiKeyModal({ ...props }: Props) {
+  // 使用useForm钩子初始化表单状态，并传入一些默认值和验证模式
   const form = useForm({
     schema,
     mode: 'onChange',
     shouldUnregister: false,
     defaultValues: { name: '', scope: [KeyScope.Read, KeyScope.Write] },
   });
+  // 使用trpc的上下文
   const queryUtils = trpc.useContext();
 
+  // 使用trpc的变异钩子添加API密钥，并在成功后使API密钥数据无效，失败时显示错误通知
   const {
     data: apiKey,
     isLoading: mutating,
@@ -45,16 +53,19 @@ export function ApiKeyModal({ ...props }: Props) {
       });
     },
   });
+  // 定义一个函数handleSaveApiKey，它接受表单值并调用变异函数
   const handleSaveApiKey = (values: TypeOf<typeof schema>) => {
     mutate(values);
   };
 
+  // 定义一个函数handleClose，它重置表单和变异状态，并调用props.onClose
   const handleClose = () => {
     form.reset();
     reset();
     props.onClose();
   };
 
+  // 返回一个模态框组件，其中包含一个表单，允许用户输入API密钥的名称，并在提交后显示API密钥
   return (
     <Modal
       {...props}
@@ -106,4 +117,5 @@ export function ApiKeyModal({ ...props }: Props) {
   );
 }
 
+// 定义Props类型为ModalProps
 type Props = ModalProps;
